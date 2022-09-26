@@ -1,0 +1,19 @@
+---
+- hosts: all
+  tasks:
+  - name: shell command to fetch expiry date of certificate
+    shell: "for p in $(openssl x509 -in /etc/ssl/dv/server.crt -noout -enddate|awk '{print $1 $2 $4}'); do echo $p;done"
+    no_log: true
+    register: command_output
+  - debug:
+          var: command_output.stdout_lines
+
+  - name: Hostname of server
+    shell: hostname
+    no_log: true
+    register: hostname_output
+  - debug:
+          var: hostname_output.stdout_lines
+
+  - name: Write  Version
+    local_action:  shell echo "{{ hostname_output.stdout_lines }}    {{ command_output.stdout_lines }}" >> /tmp/output
