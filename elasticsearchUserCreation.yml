@@ -1,0 +1,67 @@
+---
+- hosts: all
+  tasks:
+  - name: password for elastic user
+    shell: "openssl rand -hex 10"
+    register: elastic_password
+  - debug:
+        var: elastic_password.stdout_lines
+
+  - name: password for apm_system user
+    shell: "openssl rand -hex 10"
+    register: apm_system_password
+  - debug:
+        var: apm_system_password.stdout_lines
+
+  - name: password for logstash_system user
+    shell: "openssl rand -hex 10"
+    register: logstash_system_password
+  - debug:
+        var: logstash_system_password.stdout_lines
+
+  - name: password for beats_system user
+    shell: "openssl rand -hex 10"
+    register: beats_system_password
+  - debug:
+        var: beats_system_password.stdout_lines
+
+  - name: password for remote_monitoring_user user
+    shell: "openssl rand -hex 10"
+    register: remote_monitoring_user_password
+  - debug:
+        var: remote_monitoring_user_password.stdout_lines
+
+
+
+  - name: Generic question with multiple different responses
+    expect:
+            command: /usr/share/elasticsearch/bin/elasticsearch-setup-passwords interactive --url https://my.digivalet.com:9200
+            responses:
+                    Please confirm that you would like to continue \[y\/N\]: "y"
+                    Enter password for \[elastic\]: '{{elastic_password.stdout}}'
+                    Reenter password for \[elastic\]: '{{elastic_password.stdout}}'
+                    Enter password for \[apm_system\]: "{{apm_system_password.stdout}}"
+                    Reenter password for \[apm_system\]: "{{apm_system_password.stdout}}"
+                    Enter password for \[kibana\]: "26cdcc0a7a49a1603b52"
+                    Reenter password for \[kibana\]: "26cdcc0a7a49a1603b52"
+                    Enter password for \[logstash_system\]: "{{logstash_system_password.stdout}}"
+                    Reenter password for \[logstash_system\]: "{{logstash_system_password.stdout}}"
+                    Enter password for \[beats_system\]: "{{beats_system_password.stdout}}"
+                    Reenter password for \[beats_system\]: "{{beats_system_password.stdout}}"
+                    Enter password for \[remote_monitoring_user\]: "{{remote_monitoring_user_password.stdout}}"
+                    Reenter password for \[remote_monitoring_user\]: "{{remote_monitoring_user_password.stdout}}"
+
+
+
+  - name: Save the password
+    shell: echo " elastic {{ elastic_password.stdout_lines }}" > /opt/elasticsearch-cred
+  - name: Save the password
+    shell: echo " apm_system {{ apm_system_password.stdout_lines }}" >> /opt/elasticsearch-cred
+  - name: Save the password
+    shell: echo " kibana 26cdcc0a7a49a1603b52" >> /opt/elasticsearch-cred
+  - name: Save the password
+    shell: echo " logstash_system {{ logstash_system_password.stdout_lines }}" >> /opt/elasticsearch-cred
+  - name: Save the password
+    shell: echo " beats_system {{ beats_system_password.stdout_lines }}" >> /opt/elasticsearch-cred
+  - name: Save the password
+    shell: echo " remote_monitoring_user {{ remote_monitoring_user_password.stdout_lines }}" >> /opt/elasticsearch-cred
